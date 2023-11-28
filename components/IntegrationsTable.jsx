@@ -25,7 +25,7 @@ import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
 import { TableFooter, TablePagination } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { PropTypes } from '@mui/material';
+import PropTypes from 'prop-types';
 import CircularProgress from '@mui/material/CircularProgress';
 import { IntegrationsContext } from 'context/integrationsContext';
 

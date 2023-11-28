@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -25,7 +24,7 @@ import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
 import { TableFooter, TablePagination } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { PropTypes } from '@mui/material';
+import PropTypes from 'prop-types';
 
 function NetworkDashboard({
   tab,
