@@ -23,6 +23,7 @@ import TransactionProvider from 'context/transactionContext';
 import NetworksProvider from 'context/networksContext';
 import IntegrationsProvider from 'context/integrationsContext';
 
+
 // eslint-disable-next-line react/prop-types
 export default function MyApp({ Component, pageProps }) {
   return (
