@@ -16,7 +16,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getCatalogLink } from 'utils/getCatalogLink';
-import { PropTypes } from '@mui/material';
+import PropTypes from 'prop-types';
 
 import {
   Button,

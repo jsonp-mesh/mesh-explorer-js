@@ -15,7 +15,7 @@
  */
 
 import React, { useState, createContext } from 'react';
-import { PropTypes } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const defaultState = {};
 

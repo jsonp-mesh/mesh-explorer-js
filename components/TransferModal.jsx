@@ -28,7 +28,7 @@ import ConfigurePreviewForm from './ConfigurePreview';
 import ExecuteTransfer from './ExecuteTransfer';
 import GetDepositDetails from './DepositDetails';
 import { useRouter } from 'next/router';
-import { PropTypes } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const Step1 = ({
   brokerAuthData,

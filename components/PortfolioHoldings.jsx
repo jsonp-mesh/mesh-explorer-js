@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import React, { useState, useEffect } from 'react';
 import {
   Button,
@@ -32,7 +31,7 @@ import {
   DialogActions,
 } from '@mui/material';
 import { getUserId } from '../utils/UserId';
-import { PropTypes } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const PortfolioHoldings = ({ brokerType, existingAuthData }) => {
   const [portfolioHoldings, setPortfolioHoldings] = useState([]);
