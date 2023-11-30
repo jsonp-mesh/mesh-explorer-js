@@ -35,7 +35,13 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import PropTypes from 'prop-types';
 
-const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
+const CryptoTradeModal = ({
+  open,
+  onClose,
+  brokerType,
+  authToken,
+  buyingPower,
+}) => {
   const [brokerDetails, setBrokerDetails] = useState({});
   const [symbol, setSymbol] = useState('');
   const [loadingPreviewDetails, setLoadingPreviewDetails] = useState(false);
@@ -148,7 +154,7 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
       {tradeStage === 1 ? (
         <>
           <DialogTitle id="transfer-details-dialog-title">
-            Trade Form
+            Crypto Trade Form
           </DialogTitle>
 
           <DialogContent>
@@ -247,8 +253,8 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
                         <Typography variant="h6">Time In force</Typography>
                         <Select
                           required
-                          labelId="symbol-label"
-                          id="symbol"
+                          labelId="timeInForce-label"
+                          id="timeInForce"
                           value={timeInForce}
                           label="Select Symbol Type"
                           onChange={(e) => setTimeInForce(e.target.value)}
@@ -321,7 +327,7 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
   );
 };
 
-TradeModal.propTypes = {
+CryptoTradeModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   brokerType: PropTypes.string.isRequired,
@@ -329,4 +335,4 @@ TradeModal.propTypes = {
   buyingPower: PropTypes.number.isRequired,
 };
 
-export default TradeModal;
+export default CryptoTradeModal;

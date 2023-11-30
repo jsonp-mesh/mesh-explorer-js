@@ -28,7 +28,8 @@ import {
 import TransactionDetailsModal from './TransactionDetailsModal';
 import TransferDetailsModal from './TransferDetailsModal';
 import TransferModal from './TransferModal';
-import TradeModal from './TradeModal';
+import CryptoTradeModal from './CryptoTradeModal';
+import EquitiesTradeModal from './EquitiesTradeModal';
 import PortfolioHoldings from './PortfolioHoldings';
 import { disconnect, refresh } from 'utils/connections';
 import PropTypes from 'prop-types';
@@ -42,6 +43,8 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
   const [openTransferDetailsModal, setOpenTransferDetailsModal] =
     useState(false);
   const [openTradeModal, setOpenTradeModal] = useState(false);
+  const [openEquitiesModal, setOpenEquitiesModal] = useState(false);
+
   const [selectedData, setSelectedData] = useState(null);
   const [portfolioValue, setPortfolioValue] = useState({});
   const [currentDataItem, setCurrentDataItem] = useState(null);
@@ -136,9 +139,14 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
     setOpenTransactionDetailsModal(true);
   }, []);
 
-  const handleTrade = useCallback((data) => {
+  const handleCryptoTrade = useCallback((data) => {
     setSelectedData(data);
     setOpenTradeModal(true);
+  }, []);
+
+  const handleEquitiesTrade = useCallback((data) => {
+    setSelectedData(data);
+    setOpenEquitiesModal(true);
   }, []);
 
   const handleTransferDetails = useCallback((data) => {
@@ -400,11 +408,19 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
-                        handleTrade(currentDataItem);
+                        handleCryptoTrade(currentDataItem);
                         handleMenuClose();
                       }}
                     >
-                      Trade
+                      Crypto Trade
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleEquitiesTrade(currentDataItem);
+                        handleMenuClose();
+                      }}
+                    >
+                      Equities Trade
                     </MenuItem>
                   </Menu>
                 </div>
@@ -446,8 +462,25 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                 />
               )}
               {openTradeModal && selectedData && (
-                <TradeModal
+                <CryptoTradeModal
                   open={openTradeModal}
+                  buyingPower={
+                    balance[data?.accessToken?.brokerName]?.content.balances[0]
+                      ?.buyingPower
+                  }
+                  onClose={() => {
+                    setOpenTradeModal(false);
+                    setSelectedData(null);
+                  }}
+                  brokerType={selectedData.accessToken.brokerType}
+                  authToken={
+                    selectedData.accessToken.accountTokens[0]?.accessToken
+                  }
+                />
+              )}
+              {openEquitiesModal && selectedData && (
+                <EquitiesTradeModal
+                  open={openEquitiesModal}
                   buyingPower={
                     balance[data?.accessToken?.brokerName]?.content.balances[0]
                       ?.buyingPower
