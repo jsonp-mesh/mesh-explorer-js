@@ -56,6 +56,7 @@ const CryptoTradeModal = ({
   const [loadingExecution, setLoadingExecution] = useState(false);
   const [tradeResponse, setTradeResponse] = useState({});
   const [price, setPrice] = useState(1);
+  const [amountType, setAmountType] = useState('quantity');
 
   useEffect(() => {
     setLoadingBrokerDetails(true);
@@ -117,9 +118,11 @@ const CryptoTradeModal = ({
 
   const handleTrade = async () => {
     setLoadingPreviewDetails(true);
+    const amountIsInPaymentSymbol = amountType === 'dollars';
+
     try {
       const getTradePreview = await fetch(
-        `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&price=${price}`,
+        `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&price=${price}&isCryptoCurrency=false&amountIsInPaymentSymbol=&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -144,6 +147,15 @@ const CryptoTradeModal = ({
     }
   };
 
+  const getSupportedAmountTypes = () => {
+    const types = ['quantity'];
+    if (
+      brokerDetails?.marketType?.supportsPlacingBuyOrdersInPaymentSymbolAmount
+    ) {
+      types.push('dollars');
+    }
+    return types;
+  };
   return (
     <Dialog
       open={open}
@@ -237,7 +249,23 @@ const CryptoTradeModal = ({
                           />
                         </FormControl>
                       )}
-
+                      <FormControl fullWidth>
+                        <Typography variant="h6">Amount Type</Typography>
+                        <Select
+                          required
+                          labelId="amountType-label"
+                          id="amountType"
+                          value={amountType}
+                          label="Select Amount Type"
+                          onChange={(e) => setAmountType(e.target.value)}
+                        >
+                          {getSupportedAmountTypes().map((type, index) => (
+                            <MenuItem key={index} value={type}>
+                              {type}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Amount</Typography>
                         <TextField

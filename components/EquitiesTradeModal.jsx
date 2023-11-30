@@ -45,7 +45,6 @@ const EquitiesTradeModal = ({
   const [brokerDetails, setBrokerDetails] = useState({});
   const [symbol, setSymbol] = useState('');
   const [loadingPreviewDetails, setLoadingPreviewDetails] = useState(false);
-  const [assets, setAssets] = useState([]);
   const [orderType, setOrderType] = useState('marketType');
   const [side, setSide] = useState('buy');
   const [amount, setAmount] = useState(1);
@@ -55,6 +54,8 @@ const EquitiesTradeModal = ({
   const [tradeStage, setTradeStage] = useState(1);
   const [loadingExecution, setLoadingExecution] = useState(false);
   const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [amountType, setAmountType] = useState('quantity');
+  const [amountIsInPaymentSymbol, setAmountIsInPaymentSymbol] = useState(false);
 
   const [tradeResponse, setTradeResponse] = useState({});
   const [price, setPrice] = useState(1);
@@ -80,7 +81,6 @@ const EquitiesTradeModal = ({
 
         const data = await response.json();
         setBrokerDetails(data.stockOrders);
-        setAssets(data.cryptocurrencyOrders?.supportedCryptocurrencySymbols);
         setLoadingBrokerDetails(false);
       } catch (error) {
         console.error(error);
@@ -99,6 +99,10 @@ const EquitiesTradeModal = ({
     }
   }, [brokerDetails]);
 
+  useEffect(() => {
+    setAmountIsInPaymentSymbol(amountType === 'dollars');
+  }, [amountType]);
+
   const getSupportedTimeInForceList = () => {
     if (brokerDetails && brokerDetails[orderType]) {
       return brokerDetails[orderType].supportedTimeInForceList;
@@ -110,17 +114,22 @@ const EquitiesTradeModal = ({
 
   const handleTrade = async () => {
     setLoadingPreviewDetails(true);
+
+    let apiURL = `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=false&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
+
+    // rest of your code
+
+    if (orderType === 'limitType' || orderType === 'stopLossType') {
+      apiURL += `&price=${price}`;
+    }
     try {
-      const getTradePreview = await fetch(
-        `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&price=${price}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            authToken: authToken,
-          },
-          method: 'POST',
-        }
-      );
+      const getTradePreview = await fetch(apiURL, {
+        headers: {
+          'Content-Type': 'application/json',
+          authToken: authToken,
+        },
+        method: 'POST',
+      });
 
       if (!getTradePreview.ok) {
         setLoadingPreviewDetails(false);
@@ -135,6 +144,16 @@ const EquitiesTradeModal = ({
     } catch (error) {
       console.log('this was the error from Mesh', error);
     }
+  };
+
+  const getSupportedAmountTypes = () => {
+    const types = ['quantity'];
+    if (
+      brokerDetails?.marketType?.supportsPlacingBuyOrdersInPaymentSymbolAmount
+    ) {
+      types.push('dollars');
+    }
+    return types;
   };
 
   return (
@@ -225,7 +244,23 @@ const EquitiesTradeModal = ({
                           />
                         </FormControl>
                       )}
-
+                      <FormControl fullWidth>
+                        <Typography variant="h6">Amount Type</Typography>
+                        <Select
+                          required
+                          labelId="amountType-label"
+                          id="amountType"
+                          value={amountType}
+                          label="Select Amount Type"
+                          onChange={(e) => setAmountType(e.target.value)}
+                        >
+                          {getSupportedAmountTypes().map((type, index) => (
+                            <MenuItem key={index} value={type}>
+                              {type}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Amount</Typography>
                         <TextField
@@ -299,6 +334,8 @@ const EquitiesTradeModal = ({
           loadingExecution={loadingExecution}
           setLoadingExecution={setLoadingExecution}
           setTradeResponse={setTradeResponse}
+          isCryptoCurrency="false"
+          amountIsInPaymentSymbol={amountIsInPaymentSymbol}
         />
       ) : null}
 

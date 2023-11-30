@@ -33,20 +33,34 @@ export default async function handler(req, res) {
     },
   });
 
+  let payload = {
+    authToken: authToken,
+    type: req.query.brokerType,
+    symbol: req.query.symbol,
+    paymentSymbol: req.query.paymentSymbol,
+    amountIsInPaymentSymbol: req.query.amountIsInPaymentSymbol === 'true',
+    amount: req.query.amount,
+    isCryptoCurrency: req.query.isCryptoCurrency === 'true',
+    paymentIsCryptoCurrency: false,
+    orderType: req.query.orderType.slice(0, -4),
+    timeInForce: req.query.timeInForce,
+  };
+
+  if (req.query.amountIsInPaymentSymbol === 'true') {
+    payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+  } else {
+    payload.amount = parseFloat(req.query.amount);
+  }
+
+  if (req.query.price && req.query.price.trim() !== '') {
+    payload = { ...payload, price: parseFloat(req.query.price) };
+  }
+
+  if (req.query.price && !isNaN(parseFloat(req.query.price))) {
+    payload.price = parseFloat(req.query.price);
+  }
   try {
-    const payload = {
-      authToken: authToken,
-      type: req.query.brokerType,
-      symbol: req.query.symbol,
-      paymentSymbol: req.query.paymentSymbol,
-      amountIsInPaymentSymbol: false,
-      amount: req.query.amount,
-      price: req.query.price,
-      isCryptoCurrency: true,
-      paymentIsCryptoCurrency: false,
-      orderType: req.query.orderType.slice(0, -4),
-      timeInForce: req.query.timeInForce,
-    };
+    console.log(payload);
 
     const tradeExecution = await api.transactions.v1TransactionsCreate(
       req.query.side,

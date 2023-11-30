@@ -139,6 +139,11 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
     setOpenTransactionDetailsModal(true);
   }, []);
 
+  const handleTransferDetails = useCallback((data) => {
+    setSelectedData(data);
+    setOpenTransferDetailsModal(true);
+  }, []);
+
   const handleCryptoTrade = useCallback((data) => {
     setSelectedData(data);
     setOpenTradeModal(true);
@@ -147,11 +152,6 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
   const handleEquitiesTrade = useCallback((data) => {
     setSelectedData(data);
     setOpenEquitiesModal(true);
-  }, []);
-
-  const handleTransferDetails = useCallback((data) => {
-    setSelectedData(data);
-    setOpenTransferDetailsModal(true);
   }, []);
 
   const handleDisconnect = async (authData) => {
@@ -486,7 +486,7 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                       ?.buyingPower
                   }
                   onClose={() => {
-                    setOpenTradeModal(false);
+                    setOpenEquitiesModal(false);
                     setSelectedData(null);
                   }}
                   brokerType={selectedData.accessToken.brokerType}
