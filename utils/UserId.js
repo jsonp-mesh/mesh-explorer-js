@@ -32,6 +32,12 @@ export const getUserId = (brokerType) => {
       return `binance${userId}`;
     case 'alpaca':
       return `alpaca${userId}`;
+    case 'public':
+      return `public${userId}`;
+    case 'etoro':
+      return `etoro${userId}`;
+    case 'alpaca':
+      return `alpaca${userId}`;
     default:
       return '000000007';
   }

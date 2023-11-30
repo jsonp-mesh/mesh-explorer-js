@@ -1,0 +1,33 @@
+{
+    "settings": {
+      "react": {
+        "version": "18.2.0"
+      }
+    },
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true,
+        "commonjs": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended",
+      "prettier"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2021,
+      "sourceType": "module"
+    },
+    "plugins": [
+      "react",
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": ["error", {
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "semi": true
+      }]
+    }
+  }
