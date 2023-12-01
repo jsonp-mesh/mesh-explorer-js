@@ -42,20 +42,25 @@ const TradePreviewModal = ({
   loadingExecution,
   setLoadingExecution,
   setTradeResponse,
+  isCryptoCurrency,
+  amountIsInPaymentSymbol,
 }) => {
   const executeTrade = async () => {
     setLoadingExecution(true);
+
+    let apiURL = `/api/transactions/execute?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=${isCryptoCurrency}&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
+
+    if (orderType === 'limitType' || orderType === 'stopLossType') {
+      apiURL += `&price=${price}`;
+    }
     try {
-      const executeTrade = await fetch(
-        `/api/transactions/execute?side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&brokerType=${brokerType}&price=${price}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            authToken: authToken,
-          },
-          method: 'POST',
-        }
-      );
+      const executeTrade = await fetch(apiURL, {
+        headers: {
+          'Content-Type': 'application/json',
+          authToken: authToken,
+        },
+        method: 'POST',
+      });
 
       if (!executeTrade.ok) {
         setLoadingExecution(false);
@@ -133,17 +138,20 @@ const TradePreviewModal = ({
                     label="Select Side Type"
                   />
                 </FormControl>
-                <FormControl fullWidth>
-                  <Typography variant="h6">Price</Typography>
-                  <TextField
-                    required
-                    disabled
-                    id="price"
-                    value={price}
-                    label="Price"
-                    helperText="Price of the unit, used for Limit and StopLoss orders."
-                  />
-                </FormControl>
+                {price && (
+                  <FormControl fullWidth>
+                    <Typography variant="h6">Price</Typography>
+                    <TextField
+                      required
+                      disabled
+                      id="price"
+                      value={price}
+                      label="Price"
+                      helperText="Price of the unit, used for Limit and StopLoss orders."
+                    />
+                  </FormControl>
+                )}
+
                 <FormControl fullWidth>
                   <Typography variant="h6">Amount</Typography>
                   <TextField
@@ -209,6 +217,8 @@ TradePreviewModal.propTypes = {
   loadingExecution: PropTypes.bool.isRequired,
   setLoadingExecution: PropTypes.func.isRequired,
   setTradeResponse: PropTypes.func.isRequired,
+  isCryptoCurrency: PropTypes.string.isRequired,
+  amountIsInPaymentSymbol: PropTypes.string.isRequired,
 };
 
 export default TradePreviewModal;

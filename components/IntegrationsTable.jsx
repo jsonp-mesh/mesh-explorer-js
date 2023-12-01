@@ -47,7 +47,6 @@ function IntegrationsDashboard({ page, setPage }) {
           throw new Error('Failed to fetch integrations');
         }
 
-        console.log('data', data.content.integrations);
         setIntegrations(data.content.integrations);
       } catch (error) {
         console.log('error', error);

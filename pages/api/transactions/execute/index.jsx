@@ -33,21 +33,46 @@ export default async function handler(req, res) {
     },
   });
 
-  try {
-    const payload = {
-      authToken: authToken,
-      type: req.query.brokerType,
-      symbol: req.query.symbol,
-      paymentSymbol: req.query.paymentSymbol,
-      amountIsInPaymentSymbol: false,
-      amount: req.query.amount,
-      price: req.query.price,
-      isCryptoCurrency: true,
-      paymentIsCryptoCurrency: false,
-      orderType: req.query.orderType.slice(0, -4),
-      timeInForce: req.query.timeInForce,
-    };
+  const getOrderType = (typeString) => {
+    if (typeString && typeString.endsWith('Type')) {
+      return typeString.slice(0, -4);
+    }
+    return typeString;
+  };
 
+  let payload = {
+    authToken: authToken,
+    type: req.query.brokerType,
+    symbol: req.query.symbol,
+    paymentSymbol: req.query.paymentSymbol,
+    isCryptoCurrency: req.query.isCryptoCurrency === 'true',
+    orderType: getOrderType(req.query.orderType),
+    timeInForce: req.query.timeInForce,
+  };
+
+  if (req.query.amountIsInPaymentSymbol === 'true') {
+    payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = true;
+  } else if (payload.type === 'coinbase') {
+    payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = true;
+  } else {
+    payload.amount = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = false;
+  }
+
+  if (req.query.price && req.query.price.trim() !== '') {
+    payload = { ...payload, price: parseFloat(req.query.price) };
+  }
+
+  if (req.query.price && req.query.price.trim() !== '') {
+    payload = { ...payload, price: parseFloat(req.query.price) };
+  }
+
+  if (req.query.price && !isNaN(parseFloat(req.query.price))) {
+    payload.price = parseFloat(req.query.price);
+  }
+  try {
     const tradeExecution = await api.transactions.v1TransactionsCreate(
       req.query.side,
       payload

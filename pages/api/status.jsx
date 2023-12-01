@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { FrontApi } from '@front-finance/api';
 
 export default async function handler(req, res) {

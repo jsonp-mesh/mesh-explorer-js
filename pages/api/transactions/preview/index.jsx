@@ -35,52 +35,51 @@ export default async function handler(req, res) {
 
   const getOrderType = (typeString) => {
     if (typeString && typeString.endsWith('Type')) {
-        return typeString.slice(0, -4);
+      return typeString.slice(0, -4);
     }
     return typeString;
-};
+  };
 
-   const payload = {
+  let payload = {
     authToken: authToken,
     type: req.query.brokerType,
     symbol: req.query.symbol,
     paymentSymbol: req.query.paymentSymbol,
-    isCryptoCurrency: true,
-    amount: parseFloat(req.query.amount),
+    isCryptoCurrency: req.query.isCryptoCurrency === 'true',
     orderType: getOrderType(req.query.orderType),
     timeInForce: req.query.timeInForce,
-    price: req.query.price
-};
+  };
 
-if (req.query.price && req.query.price.trim() !== '') {
-    payload.price = parseFloat(req.query.price);
-}
+  if (req.query.amountIsInPaymentSymbol === 'true') {
+    payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = true;
+  } else if (payload.type === 'coinbase') {
+    payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = true;
+  } else {
+    payload.amount = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = false;
+  }
 
+  if (req.query.price && req.query.price.trim() !== '') {
+    payload = { ...payload, price: parseFloat(req.query.price) };
+  }
 
   try {
-   
-
     const tradePreview = await api.transactions.v1TransactionsPreviewCreate(
-     req.query.side,
+      req.query.side,
       payload
     );
 
-      console.log(tradePreview.status, tradePreview.data.status)
-
-    if (
-      tradePreview.status !== 200 ||
-      tradePreview.data.status !== 'ok'
-    ) {
+    if (tradePreview.status !== 200 || tradePreview.data.status !== 'ok') {
       throw new Error(
-        `Failed to fetch trade Preview: ${JSON.stringify(
-          tradePreview.data
-        )}`
+        `Failed to fetch trade Preview: ${JSON.stringify(tradePreview.data)}`
       );
     }
     return res.status(200).json(tradePreview.data.content);
   } catch (error) {
-
-        const clientErrorMessage = error.response?.data?.content?.errorMessage ||
+    const clientErrorMessage =
+      error.response?.data?.content?.errorMessage ||
       error.response?.data?.message ||
       error.message;
 
@@ -90,8 +89,8 @@ if (req.query.price && req.query.price.trim() !== '') {
         method: req.method,
         endpoint: req.url,
         status: error.response?.status,
-        data: error.response?.data
-      }
+        data: error.response?.data,
+      },
     });
   }
 }

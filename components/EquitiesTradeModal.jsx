@@ -29,25 +29,36 @@ import {
   MenuItem,
   Grid,
   TextField,
+  FormHelperText,
 } from '@mui/material';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import PropTypes from 'prop-types';
 
-const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
+const EquitiesTradeModal = ({
+  open,
+  onClose,
+  brokerType,
+  authToken,
+  buyingPower,
+}) => {
   const [brokerDetails, setBrokerDetails] = useState({});
   const [symbol, setSymbol] = useState('');
   const [loadingPreviewDetails, setLoadingPreviewDetails] = useState(false);
-  const [assets, setAssets] = useState([]);
   const [orderType, setOrderType] = useState('marketType');
   const [side, setSide] = useState('buy');
   const [amount, setAmount] = useState(1);
   const [loadingBrokerDetails, setLoadingBrokerDetails] = useState(false);
-  const [timeInForce, setTimeInForce] = useState('GTC');
+  const [timeInForce, setTimeInForce] = useState('');
   const [paymentSymbol, setPaymentSumbol] = useState('USD');
   const [tradeStage, setTradeStage] = useState(1);
   const [loadingExecution, setLoadingExecution] = useState(false);
+  const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [amountType, setAmountType] = useState('quantity');
+  const [amountIsInPaymentSymbol, setAmountIsInPaymentSymbol] = useState(false);
+  const [isError, setIsError] = useState(false);
+
   const [tradeResponse, setTradeResponse] = useState({});
   const [price, setPrice] = useState(1);
 
@@ -71,8 +82,7 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
         }
 
         const data = await response.json();
-        setBrokerDetails(data);
-        setAssets(data.cryptocurrencyOrders?.supportedCryptocurrencySymbols);
+        setBrokerDetails(data.stockOrders);
         setLoadingBrokerDetails(false);
       } catch (error) {
         console.error(error);
@@ -82,27 +92,22 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
     fetchBrokerDetails();
   }, [brokerType]);
 
-  let dropdownOptions = [];
+  useEffect(() => {
+    if (brokerDetails) {
+      const options = ['marketType', 'limitType', 'stopLossType']
+        .filter((type) => brokerDetails[type]?.supported)
+        .map((type) => type);
+      setDropdownOptions(options);
+    }
+  }, [brokerDetails]);
 
-  if (brokerDetails) {
-    const { cryptocurrencyOrders } = brokerDetails;
-    if (cryptocurrencyOrders?.marketType.supported) {
-      dropdownOptions.push('marketType');
-    }
-    if (cryptocurrencyOrders?.limitType.supported) {
-      dropdownOptions.push('limitType');
-    }
-    if (cryptocurrencyOrders?.stopLossType.supported) {
-      dropdownOptions.push('stopLossType');
-    }
-  }
+  useEffect(() => {
+    setAmountIsInPaymentSymbol(amountType === 'dollars');
+  }, [amountType]);
+
   const getSupportedTimeInForceList = () => {
-    if (
-      brokerDetails.cryptocurrencyOrders &&
-      brokerDetails.cryptocurrencyOrders[orderType]
-    ) {
-      return brokerDetails.cryptocurrencyOrders[orderType]
-        .supportedTimeInForceList;
+    if (brokerDetails && brokerDetails[orderType]) {
+      return brokerDetails[orderType].supportedTimeInForceList;
     }
     return null;
   };
@@ -110,23 +115,29 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
   const supportedTimeInForceList = getSupportedTimeInForceList();
 
   const handleTrade = async () => {
+    if (!orderType || !symbol || !side) {
+      setIsError(true);
+      return;
+    }
     setLoadingPreviewDetails(true);
+
+    let apiURL = `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=false&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
+
+    if (orderType === 'limitType' || orderType === 'stopLossType') {
+      apiURL += `&price=${price}`;
+    }
     try {
-      const getTradePreview = await fetch(
-        `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&price=${price}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            authToken: authToken,
-          },
-          method: 'POST',
-        }
-      );
+      const getTradePreview = await fetch(apiURL, {
+        headers: {
+          'Content-Type': 'application/json',
+          authToken: authToken,
+        },
+        method: 'POST',
+      });
 
       if (!getTradePreview.ok) {
         setLoadingPreviewDetails(false);
         const errorResponse = await getTradePreview.json();
-        console.log(errorResponse.details);
         alert(`Preview Failed: ${errorResponse.error}`);
         return;
       }
@@ -136,6 +147,16 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
     } catch (error) {
       console.log('this was the error from Mesh', error);
     }
+  };
+
+  const getSupportedAmountTypes = () => {
+    const types = ['quantity'];
+    if (
+      brokerDetails?.marketType?.supportsPlacingBuyOrdersInPaymentSymbolAmount
+    ) {
+      types.push('dollars');
+    }
+    return types;
   };
 
   return (
@@ -148,7 +169,7 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
       {tradeStage === 1 ? (
         <>
           <DialogTitle id="transfer-details-dialog-title">
-            Trade Form
+            Equities Trade Form
           </DialogTitle>
 
           <DialogContent>
@@ -189,20 +210,17 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
                       </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Select Symbol</Typography>
-                        <Select
+                        <TextField
                           required
                           labelId="symbol-label"
                           id="symbol"
                           value={symbol}
                           label="Select Symbol Type"
                           onChange={(e) => setSymbol(e.target.value)}
-                        >
-                          {assets.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                              {option}
-                            </MenuItem>
-                          ))}
-                        </Select>
+                        ></TextField>
+                        {isError && !symbol && (
+                          <FormHelperText>Required</FormHelperText>
+                        )}
                       </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Select Order Side</Typography>
@@ -218,7 +236,8 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
                           <MenuItem value="sell">Sell</MenuItem>
                         </Select>
                       </FormControl>
-                      {orderType === 'limitType' && (
+                      {(orderType === 'limitType' ||
+                        orderType === 'stopLossType') && (
                         <FormControl fullWidth>
                           <Typography variant="h6">Price</Typography>
                           <TextField
@@ -231,7 +250,23 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
                           />
                         </FormControl>
                       )}
-
+                      <FormControl fullWidth>
+                        <Typography variant="h6">Amount Type</Typography>
+                        <Select
+                          required
+                          labelId="amountType-label"
+                          id="amountType"
+                          value={amountType}
+                          label="Select Amount Type"
+                          onChange={(e) => setAmountType(e.target.value)}
+                        >
+                          {getSupportedAmountTypes().map((type, index) => (
+                            <MenuItem key={index} value={type}>
+                              {type}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Amount</Typography>
                         <TextField
@@ -247,10 +282,10 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
                         <Typography variant="h6">Time In force</Typography>
                         <Select
                           required
-                          labelId="symbol-label"
-                          id="symbol"
+                          labelId="timeInForce-label"
+                          id="timeInForce"
                           value={timeInForce}
-                          label="Select Symbol Type"
+                          label="Select Time In Force Type"
                           onChange={(e) => setTimeInForce(e.target.value)}
                         >
                           {supportedTimeInForceList?.map((option, index) => (
@@ -305,6 +340,8 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
           loadingExecution={loadingExecution}
           setLoadingExecution={setLoadingExecution}
           setTradeResponse={setTradeResponse}
+          isCryptoCurrency="false"
+          amountIsInPaymentSymbol={amountIsInPaymentSymbol}
         />
       ) : null}
 
@@ -321,7 +358,7 @@ const TradeModal = ({ open, onClose, brokerType, authToken, buyingPower }) => {
   );
 };
 
-TradeModal.propTypes = {
+EquitiesTradeModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   brokerType: PropTypes.string.isRequired,
@@ -329,4 +366,4 @@ TradeModal.propTypes = {
   buyingPower: PropTypes.number.isRequired,
 };
 
-export default TradeModal;
+export default EquitiesTradeModal;

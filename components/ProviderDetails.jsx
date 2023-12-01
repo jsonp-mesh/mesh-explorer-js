@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   Avatar,
@@ -29,9 +28,11 @@ import {
 import TransactionDetailsModal from './TransactionDetailsModal';
 import TransferDetailsModal from './TransferDetailsModal';
 import TransferModal from './TransferModal';
-import TradeModal from './TradeModal';
+import CryptoTradeModal from './CryptoTradeModal';
+import EquitiesTradeModal from './EquitiesTradeModal';
 import PortfolioHoldings from './PortfolioHoldings';
 import { disconnect, refresh } from 'utils/connections';
+import { tradingAllowed } from 'utils/tradingRules';
 import PropTypes from 'prop-types';
 
 const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
@@ -43,6 +44,8 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
   const [openTransferDetailsModal, setOpenTransferDetailsModal] =
     useState(false);
   const [openTradeModal, setOpenTradeModal] = useState(false);
+  const [openEquitiesModal, setOpenEquitiesModal] = useState(false);
+
   const [selectedData, setSelectedData] = useState(null);
   const [portfolioValue, setPortfolioValue] = useState({});
   const [currentDataItem, setCurrentDataItem] = useState(null);
@@ -137,14 +140,19 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
     setOpenTransactionDetailsModal(true);
   }, []);
 
-  const handleTrade = useCallback((data) => {
+  const handleTransferDetails = useCallback((data) => {
+    setSelectedData(data);
+    setOpenTransferDetailsModal(true);
+  }, []);
+
+  const handleCryptoTrade = useCallback((data) => {
     setSelectedData(data);
     setOpenTradeModal(true);
   }, []);
 
-  const handleTransferDetails = useCallback((data) => {
+  const handleEquitiesTrade = useCallback((data) => {
     setSelectedData(data);
-    setOpenTransferDetailsModal(true);
+    setOpenEquitiesModal(true);
   }, []);
 
   const handleDisconnect = async (authData) => {
@@ -224,6 +232,10 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const tradeOptions = (brokerType, tradeType) => {
+    return tradingAllowed(brokerType, tradeType);
   };
   return (
     <Grid container spacing={3}>
@@ -399,14 +411,33 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                     >
                       Transfers History
                     </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleTrade(currentDataItem);
-                        handleMenuClose();
-                      }}
-                    >
-                      Trade
-                    </MenuItem>
+                    {tradeOptions(
+                      currentDataItem?.accessToken?.brokerType,
+                      'crypto'
+                    ) && (
+                      <MenuItem
+                        onClick={() => {
+                          handleCryptoTrade(currentDataItem);
+                          handleMenuClose();
+                        }}
+                      >
+                        Crypto Trade
+                      </MenuItem>
+                    )}
+                    {tradeOptions(
+                      currentDataItem?.accessToken?.brokerType,
+                      'equities'
+                    ) &&
+                      currentDataItem?.accessToken?.brokerType && (
+                        <MenuItem
+                          onClick={() => {
+                            handleEquitiesTrade(currentDataItem);
+                            handleMenuClose();
+                          }}
+                        >
+                          Equities Trade
+                        </MenuItem>
+                      )}
                   </Menu>
                 </div>
               </Card>
@@ -447,7 +478,7 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                 />
               )}
               {openTradeModal && selectedData && (
-                <TradeModal
+                <CryptoTradeModal
                   open={openTradeModal}
                   buyingPower={
                     balance[data?.accessToken?.brokerName]?.content.balances[0]
@@ -455,6 +486,23 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                   }
                   onClose={() => {
                     setOpenTradeModal(false);
+                    setSelectedData(null);
+                  }}
+                  brokerType={selectedData.accessToken.brokerType}
+                  authToken={
+                    selectedData.accessToken.accountTokens[0]?.accessToken
+                  }
+                />
+              )}
+              {openEquitiesModal && selectedData && (
+                <EquitiesTradeModal
+                  open={openEquitiesModal}
+                  buyingPower={
+                    balance[data?.accessToken?.brokerName]?.content.balances[0]
+                      ?.buyingPower
+                  }
+                  onClose={() => {
+                    setOpenEquitiesModal(false);
                     setSelectedData(null);
                   }}
                   brokerType={selectedData.accessToken.brokerType}

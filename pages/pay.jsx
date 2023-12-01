@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Header from '../components/Header';
@@ -33,7 +32,10 @@ import {
 
 const PayPage = () => {
   const router = useRouter();
-  const DESTINATION_ADDRESS = process.env.NEXT_PUBLIC_DESTINATION_ADDRESS;
+  const ETH_DESTINATION_ADDRESS =
+    process.env.NEXT_PUBLIC_ETH_DESTINATION_ADDRESS;
+  const SOL_DESTINATION_ADDRESS =
+    process.env.NEXT_PUBLIC_SOL_DESTINATION_ADDRESS;
 
   const [catalogLink, setCatalogLink] = useState('');
   const [openMeshModal, setOpenMeshModal] = useState(false);
@@ -104,13 +106,13 @@ const PayPage = () => {
           toAddresses: [
             {
               symbol: 'USDC',
-              address: DESTINATION_ADDRESS,
-              networkId: 'e3c7fdd8-b1fc-4e51-85ae-bb276e075611', // polygon network id
+              address: ETH_DESTINATION_ADDRESS,
+              networkId: 'e3c7fdd8-b1fc-4e51-85ae-bb276e075611', // ETHEREUM MESH network id
             },
             {
               symbol: 'SOL',
-              address: 'DVifyLEUVxCAUTdi8rPHX9fmi1tCwv7hciut4BErskZ8', // address to transfer
-              networkId: '0291810a-5947-424d-9a59-e88bb33e999d', // polygon network id
+              address: SOL_DESTINATION_ADDRESS, // address to transfer
+              networkId: '0291810a-5947-424d-9a59-e88bb33e999d', // SOLANA network id
             },
           ],
           amountInFiat: 10,

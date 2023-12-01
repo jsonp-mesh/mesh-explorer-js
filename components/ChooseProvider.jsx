@@ -109,7 +109,8 @@ const ChooseProvider = ({
       setOpenMeshModal,
       setErrorMessage,
       null,
-      integrationId
+      integrationId,
+      providerType
     );
     setLoading(false);
   };
@@ -130,6 +131,7 @@ const ChooseProvider = ({
               >
                 <MenuItem value="CEX">CEX</MenuItem>
                 <MenuItem value="Wallet">Wallet</MenuItem>
+                <MenuItem value="Full Catalogue">Full Catalogue</MenuItem>
               </Select>
             </Box>
           </FormControl>

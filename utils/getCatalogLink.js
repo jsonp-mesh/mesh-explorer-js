@@ -22,7 +22,9 @@ export const getCatalogLink = async (
   setOpenMeshModal = () => {},
   setErrorMessage = () => {},
   payload = null,
-  integrationId = null
+  integrationId = null,
+  providerType = 'CEX'
+
 ) => {
   const UserId = getUserId(brokerType);
 
@@ -43,9 +45,14 @@ export const getCatalogLink = async (
         `/api/catalog?UserId=${UserId}&integrationId=${integrationId}`,
         fetchOptions
       );
-    } else {
+    } else if (brokerType && providerType !== 'Full Catalogue') {
        link = await fetch(
         `/api/catalog?UserId=${UserId}&BrokerType=${brokerType}`,
+        fetchOptions
+      )
+    } else {
+       link = await fetch(
+        `/api/catalog?UserId=${UserId}`,
         fetchOptions
       )
     };

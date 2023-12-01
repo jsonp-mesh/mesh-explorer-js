@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { FrontApi } from '@front-finance/api';
 export default async function handler(req, res) {
   const { PROD_API_KEY, MESH_API_URL, CLIENT_ID } = process.env;
@@ -27,16 +26,15 @@ export default async function handler(req, res) {
 
   const bodyObject = {
     UserId: UserId,
+    RestrictMultipleAccounts: true,
   };
 
-
   if (BrokerType) {
-  bodyObject.BrokerType = BrokerType;
+    bodyObject.BrokerType = BrokerType;
   } else {
-        bodyObject.integrationId = integrationId;
+    bodyObject.integrationId = integrationId;
+  }
 
-}
-  
   if (transferOptions && Object.keys(transferOptions).length > 0) {
     bodyObject.transferOptions = transferOptions;
   }
@@ -51,7 +49,6 @@ export default async function handler(req, res) {
       'X-Client-Secret': PROD_API_KEY,
     },
   });
-
 
   try {
     const getCatalogLink =
