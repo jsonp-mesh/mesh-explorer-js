@@ -29,6 +29,7 @@ import {
   MenuItem,
   Grid,
   TextField,
+  FormHelperText,
 } from '@mui/material';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
@@ -49,13 +50,14 @@ const EquitiesTradeModal = ({
   const [side, setSide] = useState('buy');
   const [amount, setAmount] = useState(1);
   const [loadingBrokerDetails, setLoadingBrokerDetails] = useState(false);
-  const [timeInForce, setTimeInForce] = useState('GTC');
+  const [timeInForce, setTimeInForce] = useState('');
   const [paymentSymbol, setPaymentSumbol] = useState('USD');
   const [tradeStage, setTradeStage] = useState(1);
   const [loadingExecution, setLoadingExecution] = useState(false);
   const [dropdownOptions, setDropdownOptions] = useState([]);
   const [amountType, setAmountType] = useState('quantity');
   const [amountIsInPaymentSymbol, setAmountIsInPaymentSymbol] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const [tradeResponse, setTradeResponse] = useState({});
   const [price, setPrice] = useState(1);
@@ -113,6 +115,10 @@ const EquitiesTradeModal = ({
   const supportedTimeInForceList = getSupportedTimeInForceList();
 
   const handleTrade = async () => {
+    if (!orderType || !symbol || !side) {
+      setIsError(true);
+      return;
+    }
     setLoadingPreviewDetails(true);
 
     let apiURL = `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=false&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
@@ -213,6 +219,9 @@ const EquitiesTradeModal = ({
                           label="Select Symbol Type"
                           onChange={(e) => setSymbol(e.target.value)}
                         ></TextField>
+                        {isError && !symbol && (
+                          <FormHelperText>Required</FormHelperText>
+                        )}
                       </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Select Order Side</Typography>

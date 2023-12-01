@@ -29,6 +29,7 @@ import {
   MenuItem,
   Grid,
   TextField,
+  FormHelperText,
 } from '@mui/material';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
@@ -50,7 +51,7 @@ const CryptoTradeModal = ({
   const [side, setSide] = useState('buy');
   const [amount, setAmount] = useState(1);
   const [loadingBrokerDetails, setLoadingBrokerDetails] = useState(false);
-  const [timeInForce, setTimeInForce] = useState('GTC');
+  const [timeInForce, setTimeInForce] = useState('');
   const [paymentSymbol, setPaymentSumbol] = useState('USD');
   const [tradeStage, setTradeStage] = useState(1);
   const [loadingExecution, setLoadingExecution] = useState(false);
@@ -58,6 +59,7 @@ const CryptoTradeModal = ({
   const [price, setPrice] = useState(1);
   const [amountType, setAmountType] = useState('quantity');
   const [amountIsInPaymentSymbol, setAmountIsInPaymentSymbol] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     setLoadingBrokerDetails(true);
@@ -123,6 +125,10 @@ const CryptoTradeModal = ({
   const supportedTimeInForceList = getSupportedTimeInForceList();
 
   const handleTrade = async () => {
+    if (!orderType || !symbol || !side) {
+      setIsError(true);
+      return;
+    }
     setLoadingPreviewDetails(true);
 
     let apiURL = `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=true&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
@@ -228,6 +234,9 @@ const CryptoTradeModal = ({
                             </MenuItem>
                           ))}
                         </Select>
+                        {isError && !symbol && (
+                          <FormHelperText>Required</FormHelperText>
+                        )}
                       </FormControl>
                       <FormControl fullWidth>
                         <Typography variant="h6">Select Order Side</Typography>

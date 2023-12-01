@@ -32,6 +32,7 @@ import CryptoTradeModal from './CryptoTradeModal';
 import EquitiesTradeModal from './EquitiesTradeModal';
 import PortfolioHoldings from './PortfolioHoldings';
 import { disconnect, refresh } from 'utils/connections';
+import { tradingAllowed } from 'utils/tradingRules';
 import PropTypes from 'prop-types';
 
 const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
@@ -232,6 +233,10 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
+  const tradeOptions = (brokerType, tradeType) => {
+    return tradingAllowed(brokerType, tradeType);
+  };
   return (
     <Grid container spacing={3}>
       {existingAuthData?.map((data, index) => (
@@ -406,22 +411,34 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                     >
                       Transfers History
                     </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleCryptoTrade(currentDataItem);
-                        handleMenuClose();
-                      }}
-                    >
-                      Crypto Trade
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleEquitiesTrade(currentDataItem);
-                        handleMenuClose();
-                      }}
-                    >
-                      Equities Trade
-                    </MenuItem>
+                    {tradeOptions(
+                      currentDataItem?.accessToken?.brokerType,
+                      'crypto'
+                    ) && (
+                      <MenuItem
+                        onClick={() => {
+                          handleCryptoTrade(currentDataItem);
+                          handleMenuClose();
+                        }}
+                      >
+                        Crypto Trade
+                      </MenuItem>
+                    )}
+                    {tradeOptions(
+                      currentDataItem?.accessToken?.brokerType,
+                      'equities'
+                    ) &&
+                      currentDataItem?.accessToken?.brokerType && (
+                        <MenuItem
+                          onClick={() => {
+                            console.log('data item,', currentDataItem);
+                            handleEquitiesTrade(currentDataItem);
+                            handleMenuClose();
+                          }}
+                        >
+                          Equities Trade
+                        </MenuItem>
+                      )}
                   </Menu>
                 </div>
               </Card>
