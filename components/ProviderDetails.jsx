@@ -431,7 +431,6 @@ const ProviderDetails = ({ existingAuthData, setExistingAuthData }) => {
                       currentDataItem?.accessToken?.brokerType && (
                         <MenuItem
                           onClick={() => {
-                            console.log('data item,', currentDataItem);
                             handleEquitiesTrade(currentDataItem);
                             handleMenuClose();
                           }}

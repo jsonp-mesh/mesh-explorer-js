@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import React, { useState, useEffect } from 'react';
 import MeshModal from '../components/MeshModal';
 import { useRouter } from 'next/router';
@@ -42,7 +41,7 @@ const TransferPage = () => {
   const [selectedToken, setSelectedToken] = useState('');
   const [selectedNetworkId, setSelectedNetworkId] = useState('');
 
-  const DESTINATION_ADDRESS = process.env.NEXT_PUBLIC_DESTINATION_ADDRESS;
+  const ETH_ADDRESS = process.env.NEXT_PUBLIC_ETH_DESTINATION_ADDRESS;
   const router = useRouter();
   const handleTypeChange = (e) => setSelectedType(e.target.value);
   const handleTokenChange = (e) => setSelectedToken(e.target.value);
@@ -88,7 +87,7 @@ const TransferPage = () => {
       toAddresses: [
         {
           symbol: selectedToken, // symbol to transfer
-          address: DESTINATION_ADDRESS, // address to transfer
+          address: ETH_ADDRESS, // address to transfer
           networkId: selectedNetworkId, // network id from /api/v1/transfers/managed/networks request
         },
       ],

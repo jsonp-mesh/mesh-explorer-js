@@ -61,21 +61,15 @@ export default async function handler(req, res) {
     payload.amountIsInPaymentSymbol = false;
   }
 
-  console.log('Preview Payload:', payload);
-
   if (req.query.price && req.query.price.trim() !== '') {
     payload = { ...payload, price: parseFloat(req.query.price) };
   }
-
-  console.log(payload);
 
   try {
     const tradePreview = await api.transactions.v1TransactionsPreviewCreate(
       req.query.side,
       payload
     );
-
-    console.log(tradePreview.status, tradePreview.data.status);
 
     if (tradePreview.status !== 200 || tradePreview.data.status !== 'ok') {
       throw new Error(

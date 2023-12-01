@@ -66,7 +66,6 @@ const GetDepositDetails = ({
   };
 
   useEffect(() => {
-    console.log('hit chains', formValues.symbol);
     if (formValues.symbol) {
       updateChainsBasedOnSymbol(formValues.symbol);
     }

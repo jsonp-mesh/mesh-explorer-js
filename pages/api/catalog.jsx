@@ -50,8 +50,6 @@ export default async function handler(req, res) {
     },
   });
 
-  console.log(bodyObject);
-
   try {
     const getCatalogLink =
       await api.managedAccountAuthentication.v1LinktokenCreate(bodyObject);

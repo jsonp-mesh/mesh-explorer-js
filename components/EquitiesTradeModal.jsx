@@ -138,7 +138,6 @@ const EquitiesTradeModal = ({
       if (!getTradePreview.ok) {
         setLoadingPreviewDetails(false);
         const errorResponse = await getTradePreview.json();
-        console.log(errorResponse.details);
         alert(`Preview Failed: ${errorResponse.error}`);
         return;
       }

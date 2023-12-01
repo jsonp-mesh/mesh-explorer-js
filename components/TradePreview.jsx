@@ -53,7 +53,6 @@ const TradePreviewModal = ({
     if (orderType === 'limitType' || orderType === 'stopLossType') {
       apiURL += `&price=${price}`;
     }
-    console.log('apiUrl, ', apiURL);
     try {
       const executeTrade = await fetch(apiURL, {
         headers: {

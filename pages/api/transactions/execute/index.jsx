@@ -61,8 +61,6 @@ export default async function handler(req, res) {
     payload.amountIsInPaymentSymbol = false;
   }
 
-  console.log('Execute Payload:', payload);
-
   if (req.query.price && req.query.price.trim() !== '') {
     payload = { ...payload, price: parseFloat(req.query.price) };
   }
