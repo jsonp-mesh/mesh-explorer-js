@@ -117,8 +117,6 @@ const EquitiesTradeModal = ({
 
     let apiURL = `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=false&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
 
-    // rest of your code
-
     if (orderType === 'limitType' || orderType === 'stopLossType') {
       apiURL += `&price=${price}`;
     }

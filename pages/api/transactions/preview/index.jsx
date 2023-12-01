@@ -45,18 +45,23 @@ export default async function handler(req, res) {
     type: req.query.brokerType,
     symbol: req.query.symbol,
     paymentSymbol: req.query.paymentSymbol,
-    amountIsInPaymentSymbol: req.query.amountIsInPaymentSymbol === 'true',
     isCryptoCurrency: req.query.isCryptoCurrency === 'true',
     orderType: getOrderType(req.query.orderType),
     timeInForce: req.query.timeInForce,
-    price: req.query.price,
   };
 
   if (req.query.amountIsInPaymentSymbol === 'true') {
     payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = true;
+  } else if (payload.type === 'coinbase') {
+    payload.amountInPaymentSymbol = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = true;
   } else {
     payload.amount = parseFloat(req.query.amount);
+    payload.amountIsInPaymentSymbol = false;
   }
+
+  console.log('Preview Payload:', payload);
 
   if (req.query.price && req.query.price.trim() !== '') {
     payload = { ...payload, price: parseFloat(req.query.price) };

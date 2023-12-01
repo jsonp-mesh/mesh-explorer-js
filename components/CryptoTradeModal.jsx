@@ -57,6 +57,7 @@ const CryptoTradeModal = ({
   const [tradeResponse, setTradeResponse] = useState({});
   const [price, setPrice] = useState(1);
   const [amountType, setAmountType] = useState('quantity');
+  const [amountIsInPaymentSymbol, setAmountIsInPaymentSymbol] = useState(false);
 
   useEffect(() => {
     setLoadingBrokerDetails(true);
@@ -103,6 +104,11 @@ const CryptoTradeModal = ({
       dropdownOptions.push('stopLossType');
     }
   }
+
+  useEffect(() => {
+    setAmountIsInPaymentSymbol(amountType === 'dollars');
+  }, [amountType]);
+
   const getSupportedTimeInForceList = () => {
     if (
       brokerDetails.cryptocurrencyOrders &&
@@ -118,19 +124,20 @@ const CryptoTradeModal = ({
 
   const handleTrade = async () => {
     setLoadingPreviewDetails(true);
-    const amountIsInPaymentSymbol = amountType === 'dollars';
 
+    let apiURL = `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&isCryptoCurrency=true&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`;
+
+    if (orderType === 'limitType' || orderType === 'stopLossType') {
+      apiURL += `&price=${price}`;
+    }
     try {
-      const getTradePreview = await fetch(
-        `/api/transactions/preview?brokerType=${brokerType}&side=${side}&paymentSymbol=${paymentSymbol}&symbol=${symbol}&orderType=${orderType}&timeInForce=${timeInForce}&amount=${amount}&price=${price}&isCryptoCurrency=false&amountIsInPaymentSymbol=&amountIsInPaymentSymbol=${amountIsInPaymentSymbol}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            authToken: authToken,
-          },
-          method: 'POST',
-        }
-      );
+      const getTradePreview = await fetch(apiURL, {
+        headers: {
+          'Content-Type': 'application/json',
+          authToken: authToken,
+        },
+        method: 'POST',
+      });
 
       if (!getTradePreview.ok) {
         setLoadingPreviewDetails(false);
@@ -335,6 +342,7 @@ const CryptoTradeModal = ({
           timeInForce={timeInForce}
           setTradeStage={setTradeStage}
           tradeStage={tradeStage}
+          isCryptoCurrency="true"
           paymentSymbol={paymentSymbol}
           loadingExecution={loadingExecution}
           setLoadingExecution={setLoadingExecution}
